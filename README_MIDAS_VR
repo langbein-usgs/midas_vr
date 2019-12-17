@@ -1,0 +1,168 @@
+README_MIDAS_VR
+
+
+This directory contains a modified version of MIDAS, originally written by Geoff Blewitt, reference given below.
+To that I added a more accurate method to compute the rate uncertainties that factor
+the temporal correlations in the GNSS time series. (Langbein, 2019-2020 - manuscript in review)
+
+
+Note that MIDAS_VR (and the original MIDAS) is used only to estimate the secular rates in GNSS time series.
+The rate estimates and its estimated uncertainties are relatively immune to common features or problems in
+GNSS time series; annual and semi-annual periodicities, offsets or jumps, and outliers. 
+
+
+The "_VR" modification is a modification of Hackl's (2011) algorithm using Allan Variance of Rate.
+In instead of using the Allan Variance, the VR algorithm is a jackknife procedure where, over short
+intervals of time, T, from 7 days through one-quarter of the length of the time series, rates are computed. For each
+interval, the variance of the rate is also computed and tabulated. From that list of intervals and corresponding
+rate variances, a trend, proportional to 1/T^k, is fit and then extrapolated to the point where T equals the
+length of the time series.  The square root of that variance becomes the estimated rate uncertainty.
+
+Although the rate uncertainty provided by MIDAS_VR is "better" than those provided by MIDAS, as
+measured with tests using est_noise, one needs to be cautious about using these uncertainty estimates.
+In general, the rate uncertainty provided by MIDAS_VR is less precise than those estimated by a
+Maximum Likelihood Estimator code such as est_noise.
+
+Note the MIDAS_VR (and MIDAS) only estimate secular rate; if one needs to compute other properties of
+GNSS time series, one should consider using MLE codes such as est_noise or hector as both
+can estimate sizes of various deterministic functions that represent possible transient behavior including
+offset, postseismic deformation, and/or periodicities.
+
+The program and all of its subroutines are written in FORTRAN.
+It can be compiled with:
+gfortran -O3 -o midas_vr midas_vr.f
+
+For an intel compiler, use:
+ifort -O3 -o midas_vr midas_vr.f
+
+Included is a Bourne Shell wrapper, midasvr.sh
+You will need to modify the line
+   ~/proglib/MIDAS_VR/midas_vr > MIDAS.VEL
+to point to the directory where the executable code resides.
+
+
+
+FILE LISTING
+------------
+
+DUTC.IGS08.renv         Test output file of detrended time series.  See tenv_format.
+DUTC.IGS08.step         Test step (time series discontinuity) database file
+                        http://geodesy.unr.edu/NGLStationPages/steps_readme.txt
+DUTC.IGS08.tenv         Test input file of coordinate time series.  See tenv_format.
+DUTC.IGS08.vel          Test output file of velocities.  See vel_format.
+noise.tenu              Synthetic time series of correlated noise in the tenu (free field) format
+noise.vel               Test output file of velocities.  See vel_format.
+midasvr.sh              Bourne-shell script (if on Linux, you may need to install tcsh)
+midas_vr                Linux executable (32-bit) 
+midas_vr.f              Fortran code
+README_MIDAS_VR         This file
+tenv_format             Format for .tenv input files and .renv output files
+
+-----------
+
+To USE:
+
+typing midasvr.sh will provide a listing of the arguments that are either required or optional
+Only one is required
+
+Usage:   midasvr.sh   -f tseries.tenv | -f freeform.tenu  [-s step_file] [ -A -M -O -W value] 
+
+So, with the above data files, these can be tested:
+midasvr.sh -f noise.tenu
+midasvr.sh -f DUTC.IGS08.tenv
+midasvr.sh -f DUTC.IGS08.tenv -s DUTC.IGS08.step
+
+The remaining arguements, A, M, O, and W are not used often as the defaults values have been tested.
+-A determines whether Hackl's Allan Variance of rate (AVR), or the simple Variance of rate (VR) is computed 
+      from the data
+      The default is VR or 'n'
+-O option is used if one want to output the computed values of (A)VR to the files avr_*.dat
+                                     the predicted values of (A)VT in the files avr_*.pred
+                                  and the misfit between the predicted and observed for 
+                                  various estimates of white noise and power law noise
+                                  The *.dat and *.pred can be used for plotting
+                                  See below for more information on their formats.
+-W is a parameter used in determining the weights of each value of (A)VR computed from the data.
+    the default 0.5 was determined from examination of synthetic and real data.
+-M Sets the method to compute the variance from either AVR or VR (which was set with -A).
+     'y', the default computes the variance by multiplying the Median Absolute Deviation by 1.48^2
+     'n', uses sum of squares.
+Note that the default values for A and M have been extensively tested.
+By invoking both -A and -M, the calculation should emulate the Hackl (2011) algorithm
+
+-------------
+
+Columns on the MIDAS_VR velocity files (.vel) are as follows:
+
+The first 24 columns are the same as the original MIDAS
+column 1 - 4 character station ID
+column 2 - MIDAS version label 
+column 3 - time series first epoch, in decimal year format. 
+column 4 - time series last epoch, in decimal year format (See http://geodesy.unr.edu/NGLStationPages/decyr.txt for translation to YYMMMDD format).
+column 5 - time series duration (years).
+column 6 - number of epochs of data, used or not
+column 7 - number of epochs of good data, i.e. used in at least one velocity sample 
+column 8 - number of velocity sample pairs used to estimate midas velocity
+column 9-11 - east, north, up mode velocities (m/yr)
+column 12-14 - east, north, up mode velocity uncertainties (m/yr)
+column 15-17 - east, north, up offset at at first epoch (m)
+column 18-20 - east, north, up fraction of outliers
+colums 21-23 - east, north, up standard deviation velocity pairs 
+column 24 - number of steps assumed, determined from our steps database
+
+New to MIDAS_VR
+column 25-27  - east, north, up  velocity uncertainties computed using (A)/VR algorithm by Langbein (2019)
+
+The fortran format statement for writing these variables is:
+
+      write(6,'(a4,1x,a10,2f10.4,f8.4,i5,i5,i7,
+     +        3f10.6,1x,3f9.6,
+     +        3f11.6, 3f6.3, 3f9.6, i3,1x,3f9.6)')
+     +        sta, label, t(1), t(m), delt, m, mgood, n,
+     +        ve50, vn50, vu50, sve, svn, svu,
+     +        xe50, xn50, xu50, fe, fn, fu, sde, sdn, sdu, nstep,
+     +        rate_error_e,rate_error_n,rate_error_u
+
+
+---------------------------------------------
+
+Optional OUTPUT files from MIDAS_VR if the -O flag is set:
+
+avr_[enu].dat
+   col 1 -- line number
+   col 2 -- averaging interval, in days, for computing (A)VR from data
+   col 3 -- A/VR in (meters/day)^2
+   col 4 -- The "weight" of each (A)VR used to fit a model for (A)VR
+
+avr_[enu].pred
+   col 1 -- line number
+   col 2 -- interval, in days
+   col 3 -- predicted (and extrapolated predictions of (A)VR in (meters/day)^2
+
+avr_[enu].fit
+   col 1 --  model type (white, pl-power law), flrw --flicker + random walk)
+   col 2 -- estimated rate uncertainty in mm/yr from extrapolating the model to the length of the time series
+   col 3 --  misfit of (A)VR to the model
+   col 4 -- estimated white noise amplitude
+   col 5-6 --  Estimated contribution of annual and semi-annual periodicities to rate uncertainties from (A)VR data
+   col 7 -- for pl model, amplitude of power law noise; for flrw, amplitude of flicker noise
+   col 8 -- for pl model, the estimated/trial amplitude for power law; for flrw, the amplitude of random walk noise
+
+
+References:
+
+Blewitt, G., Kreemer, C., Hammond, W.C., Gazeaux, J. (2016),
+MIDAS robust trend estimator for accurate GPS station velocities without step detection,
+J. Geophys. Res., https://doi.org/10.1002/2015JB012552.
+
+Blewitt, G.,  Hammond, W. C. and Kreemer, C.  (2018), Harnessing the GPS data explosion for interdisciplinary science, Eos, 99, https://doi.org/10.1029/2018EO104623.
+
+Hackl, M., Malservisi, R., Hugentobler, U., and Wonnacott, R. (2011),
+Estimation of velocity uncertainties from GPS time series: examples from analysis of the South African TrigNet network. {J.  Geophy. Res.,
+https://doi.org/10.1029/2010JB008142.
+
+Langbein, J. (2019 or 2020), Estimating velocity precision from GNSS time series: evaluation of different methods. Manuscript in
+review, contact me, langbein@usgs.gov
+
+
+

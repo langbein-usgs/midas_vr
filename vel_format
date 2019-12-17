@@ -1,0 +1,33 @@
+README on MIDAS Velocity fields (.vel file)
+README for velocity file from MIDAS_VR
+
+Columns on the MIDAS_VR velocity files (.vel) are as follows:
+
+The first 24 columns are the same as the original MIDAS
+column 1 - 4 character station ID
+column 2 - MIDAS version label 
+column 3 - time series first epoch, in decimal year format. 
+column 4 - time series last epoch, in decimal year format (See http://geodesy.unr.edu/NGLStationPages/decyr.txt for translation to YYMMMDD format).
+column 5 - time series duration (years).
+column 6 - number of epochs of data, used or not
+column 7 - number of epochs of good data, i.e. used in at least one velocity sample 
+column 8 - number of velocity sample pairs used to estimate midas velocity
+column 9-11 - east, north, up mode velocities (m/yr)
+column 12-14 - east, north, up mode velocity uncertainties (m/yr)
+column 15-17 - east, north, up offset at at first epoch (m)
+column 18-20 - east, north, up fraction of outliers
+colums 21-23 - east, north, up standard deviation velocity pairs 
+column 24 - number of steps assumed, determined from our steps database
+
+New to MIDAS_VR
+column 25-27  - east, north, up  velocity uncertainties computed using (A)/VR algorithm by Langbein (2019)
+
+The fortran format statement for writing these variables is:
+
+      write(6,'(a4,1x,a10,2f10.4,f8.4,i5,i5,i7,
+     +        3f10.6,1x,3f9.6,
+     +        3f11.6, 3f6.3, 3f9.6, i3,1x,3f9.6)')
+     +        sta, label, t(1), t(m), delt, m, mgood, n,
+     +        ve50, vn50, vu50, sve, svn, svu,
+     +        xe50, xn50, xu50, fe, fn, fu, sde, sdn, sdu, nstep,
+     +        rate_error_e,rate_error_n,rate_error_u

@@ -1,0 +1,42 @@
+README_MIDAS
+ftp://gneiss.nbmg.unr.edu/MIDAS_release
+
+Dear Potential MIDAS User,
+
+Please find in this directory all the files you need to get started with MIDAS.  A listing of files with brief description is given at the end of this README file.
+
+The code is written in Fortran, and can be called from a C-shell script.  It has been tested on Linux and on Mac OSx.  The executable is only for Linux (it is 32 bit, but it is possible to run it on a 64 bit machine if you have 32 bit library installed, for example, on Linux/Fedora, "sudo yum install glibc.i686"). The compile script requires installation of gfortran (either for Linux or Mac OSx).
+
+You can test MIDAS using a input file DUTC.IGS08.tenv, and optional input step file DUTC.IGS08.step (you can try without this too!).  Sample output file are provided for comparison (take care not to overwrite these!).
+
+The code is freely available, however, you must retain the copyright statement on line 3 if you use part of the code.   Also, please give credit to the MIDAS paper both in your code and in documentation or papers usingthe MIDAS technique.
+
+In the paper it was impossible to describe in natural language exactly what the code does.  I hope you can interpret the Fortran code to understand the algorithm exactly.  Hopefully, the combination of code and paper will help you to understand it.
+
+You can find MIDAS solutions for ~15,000 stations around the world that are update every week on our web page http://geodesy.unr.edu. Look at the right-hand side for MIDAS.
+
+If you publish a paper using MIDAS, please cite the open-access paper MIDAS.pdf as follows:
+
+Blewitt, G., C. Kreemer, W. C. Hammond, and J. Gazeaux (2016), MIDAS robust trend estimator for accurate GPS station velocities without step detection, J. Geophys. Res. Solid Earth, 121, 2054-2068, doi:10.1002/2015JB012552.
+
+Thanks for your interest, and I look forward to your feedback!
+
+- Geoff Blewitt (gblewitt@unr.edu),  2016-11-07
+
+FILE LISTING
+------------
+decyr			Conversion of date to decimal year. 
+                        http://geodesy.unr.edu/NGLStationPages/DecimalYearConvention
+DUTC.IGS08.renv         Test output file of detrended time series.  See tenv_format.
+DUTC.IGS08.step         Test step (time series discontinuity) database file
+                        http://geodesy.unr.edu/NGLStationPages/steps_readme.txt
+DUTC.IGS08.tenv         Test input file of coordinate time series.  See tenv_format.
+DUTC.IGS08.vel          Test output file of velocities.  See vel_format.
+midas                   C-shell script (if on Linux, you may need to install tcsh)
+midas.e                 Linux executable (32-bit) 
+midas.f                 Fortran code
+MIDAS.pdf               JGR open-access paper on MIDAS.  Please cite this paper.
+mkmidas_official        Script to compile code.  Requires that gfortran be installed.
+README_MIDAS            This file
+tenv_format             Format for .tenv input files and .renv output files
+vel_format              Format for .vel output files
