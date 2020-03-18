@@ -1,5 +1,6 @@
 README_MIDAS_VR
 
+REFERENCE to Software: https://doi.org/10.5281/zenodo.3715321
 
 This directory contains a modified version of MIDAS, originally written by Geoff Blewitt, reference given below.
 To that I added a more accurate method to compute the rate uncertainties that factor
