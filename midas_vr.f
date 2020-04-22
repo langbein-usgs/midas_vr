@@ -48,6 +48,7 @@ c     setting tol=0.001d+0 forces pairs separated by precisely 1 year
       real*8 ve50, vn50, vu50, de50, dn50, du50, ce, cn, cu
       real*8 sve, svn, svu, sde, sdn, sdu
       real*8 fe, fn, fu
+      real*8 fit_e,fit_n,fit_u
       real*8 ts, tstep(maxstep+1), tbstep(maxstep+1)
       real*8 t(maxm), tb(maxm)
       real*8 ve(maxn), vn(maxn), vu(maxn)
@@ -357,21 +358,21 @@ c  Compute rate uncertainty based upon an approximation of Power law noise
       open(52,file="avr_e.dat")
       open(53,file="avr_e.fit")
       open(54,file="avr_e.pred")
-      call AVR(t,re,m,maxm,nstep,tstep,rate_error_e)
+      call AVR(t,re,m,maxm,nstep,tstep,rate_error_e,fit_e)
       close(52)
       close(53)
       close(54)
       open(52,file="avr_n.dat")
       open(53,file="avr_n.fit")
       open(54,file="avr_n.pred")
-      call AVR(t,rn,m,maxm,nstep,tstep,rate_error_n)
+      call AVR(t,rn,m,maxm,nstep,tstep,rate_error_n,fit_n)
       close(52)
       close(53)
       close(54)
       open(52,file="avr_u.dat")
       open(53,file="avr_u.fit")
       open(54,file="avr_u.pred")
-      call AVR(t,ru,m,maxm,nstep,tstep,rate_error_u)
+      call AVR(t,ru,m,maxm,nstep,tstep,rate_error_u,fit_u)
       close(52)
       close(53)
       close(54)
@@ -381,11 +382,12 @@ c      print*,' Midas VR cpu time',Tend-Tstart
 c   Write out solution  
       write(6,'(a4,1x,a10,2f10.4,f8.4,i5,i5,i7,
      +        3f10.6,1x,3f9.6,
-     +        3f11.6, 3f6.3, 3f9.6, i3,1x,3f9.6)')
+     +        3f11.6, 3f6.3, 3f9.6, i3,1x,3f9.6,1x,3(1x,f13.2))')
      +        sta, label, t(1), t(m), delt, m, mgood, n,
      +        ve50, vn50, vu50, sve, svn, svu,
      +        xe50, xn50, xu50, fe, fn, fu, sde, sdn, sdu, nstep,
-     +        rate_error_e,rate_error_n,rate_error_u
+     +        rate_error_e,rate_error_n,rate_error_u,
+     +        fit_e,fit_n,fit_u
 c
 c   Write residuals
       if(freeformat) then
@@ -422,13 +424,13 @@ c
       end
 c
 c
-      subroutine AVR(time,res,nobs,maxm,nstep,tstep,rate_error)
+      subroutine AVR(time,res,nobs,maxm,nstep,tstep,rate_error,fit_x)
       integer iday(maxm),iiday(maxm),wn_num,nobs,icol(7),istep(100)
       integer icount(1000)
       real*8 time(maxm),res(maxm),day0,sumavs,rres(maxm),sumvar
       real*8 tims(1000),rate(100000),chi2(1000),sigavr(1000),dum(1000)
       real*8 qmedian,wn,plamp1,plep,rsum,A(1000,7),tstep(100)
-      real*8 sig_scale plexpFin wnFin rmmin
+      real*8 sig_scale plexpFin wnFin rmmin,fit_x
       real*8 minav, maxav, rate_error,tlen
       real*8 x(5),e(5),periodic,xbest(5)
       character*5 type
@@ -988,6 +990,9 @@ c      fit=999999.0
       if ( OUTy .eq. 'y')
      &  write(53,124)type,sig_scale,fit,wnFin,(x(k),k=2,5)
 c
+c  compute "fitness"
+c
+      fit_x=rmmin
        
 c  The model prediction
 c  
