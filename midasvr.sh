@@ -92,6 +92,7 @@ $OUTy  Output various files
 EOF
 
 # Run the code!
+#  user should modify the next line to point to the location of the executable
 ~/proglib/MIDAS_VR/midas_vr > MIDAS.VEL
 
 mv MIDAS.VEL "$sta".vel

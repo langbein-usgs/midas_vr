@@ -1,35 +1,56 @@
 README_MIDAS_VR
 
-REFERENCE to Software: https://doi.org/10.5281/zenodo.3715321
-
-This directory contains a modified version of MIDAS, originally written by Geoff Blewitt, reference given below.
-To that I added a more accurate method to compute the rate uncertainties that factor
-the temporal correlations in the GNSS time series. (Langbein, 2019-2020 - manuscript in review)
-
-
-Note that MIDAS_VR (and the original MIDAS) is used only to estimate the secular rates in GNSS time series.
-The rate estimates and its estimated uncertainties are relatively immune to common features or problems in
-GNSS time series; annual and semi-annual periodicities, offsets or jumps, and outliers. 
+John Langbein; 16 May, 2020
+US Geological Survery
+Menlo Park, CA USA
+langbein@usgs.gov
 
 
-The "_VR" modification is a modification of Hackl's (2011) algorithm using Allan Variance of Rate.
-In instead of using the Allan Variance, the VR algorithm is a jackknife procedure where, over short
-intervals of time, T, from 7 days through one-quarter of the length of the time series, rates are computed. For each
-interval, the variance of the rate is also computed and tabulated. From that list of intervals and corresponding
-rate variances, a trend, proportional to 1/T^k, is fit and then extrapolated to the point where T equals the
-length of the time series.  The square root of that variance becomes the estimated rate uncertainty.
+This directory contains a modified version of MIDAS, originally
+written by Geoff Blewitt, reference given below.  To that I added
+a more accurate method to compute the rate uncertainties that factor
+the temporal correlations in the GNSS time series. (Langbein, 2020
+-  https://doi.org/10.1029/2019JB019132)
 
-Although the rate uncertainty provided by MIDAS_VR is "better" than those provided by MIDAS, as
-measured with tests using est_noise, one needs to be cautious about using these uncertainty estimates.
-In general, the rate uncertainty provided by MIDAS_VR is less precise than those estimated by a
-Maximum Likelihood Estimator code such as est_noise.
 
-Note the MIDAS_VR (and MIDAS) only estimate secular rate; if one needs to compute other properties of
-GNSS time series, one should consider using MLE codes such as est_noise or hector as both
-can estimate sizes of various deterministic functions that represent possible transient behavior including
-offset, postseismic deformation, and/or periodicities.
+Note that MIDAS_VR (and the original MIDAS) is used only to estimate
+the secular rates in GNSS time series.  The rate estimates and its
+estimated uncertainties are relatively immune to common features
+or problems in GNSS time series; annual and semi-annual periodicities,
+offsets or jumps, and outliers.
+
+
+The "_VR" modification is a modification of Hackl's (2011) algorithm
+using Allan Variance of Rate.  In instead of using the Allan Variance,
+the VR algorithm is a jackknife procedure where, over short intervals
+of time, T, from 7 days through one-quarter of the length of the
+time series, rates are computed. For each interval, the variance
+of the rate is also computed and tabulated. From that list of
+intervals and corresponding rate variances, a trend, proportional
+to 1/T^k, is fit and then extrapolated to the point where T equals
+the length of the time series.  The square root of that variance
+becomes the estimated rate uncertainty.
+
+Although the rate uncertainty provided by MIDAS_VR is "better" than
+those provided by MIDAS, as measured with tests using est_noise,
+one needs to be cautious about using these uncertainty estimates.
+In general, the rate uncertainty provided by MIDAS_VR is less precise
+than those estimated by a Maximum Likelihood Estimator code such
+as est_noise (Langbein, 2017; https://doi.org/10.1007/s00190-017-1002-5
+and https://github.com/langbein-usgs/est_noise or
+https://doi.org/10.5281/zenodo.3715451). 
+For more examples, see the Addendum01.pdf in this directory.
+.
+
+Note the MIDAS_VR (and MIDAS) only estimate secular rate; if one
+needs to compute other properties of GNSS time series, one should
+consider using MLE codes such as est_noise or hector as both can
+estimate sizes of various deterministic functions that represent
+possible transient behavior including offset, postseismic deformation,
+and/or periodicities.
 
 The program and all of its subroutines are written in FORTRAN.
+
 It can be compiled with:
 gfortran -O3 -o midas_vr midas_vr.f
 
@@ -45,7 +66,7 @@ to point to the directory where the executable code resides.
 
 FILE LISTING
 ------------
-
+Addendum01.pdf          More discussion on the use of midas_vr.
 DUTC.IGS08.renv         Test output file of detrended time series.  See tenv_format.
 DUTC.IGS08.step         Test step (time series discontinuity) database file
                         http://geodesy.unr.edu/NGLStationPages/steps_readme.txt
@@ -53,10 +74,11 @@ DUTC.IGS08.tenv         Test input file of coordinate time series.  See tenv_for
 DUTC.IGS08.vel          Test output file of velocities.  See vel_format.
 noise.tenu              Synthetic time series of correlated noise in the tenu (free field) format
 noise.vel               Test output file of velocities.  See vel_format.
-midasvr.sh              Bourne-shell script (if on Linux, you may need to install tcsh)
-midas_vr                Linux executable (32-bit) 
-midas_vr.f              Fortran code
+midasvr.sh              Bourne-shell script 
+midas_vr                MacIntosh executable -- Best to recompile. 
+midas_vr.f              Fortran source code
 README_MIDAS_VR         This file
+README_MIDAS            Geoff Blewitt's readme file for his original version of midas.
 tenv_format             Format for .tenv input files and .renv output files
 
 -----------
@@ -99,7 +121,8 @@ The first 24 columns are the same as the original MIDAS
 column 1 - 4 character station ID
 column 2 - MIDAS version label 
 column 3 - time series first epoch, in decimal year format. 
-column 4 - time series last epoch, in decimal year format (See http://geodesy.unr.edu/NGLStationPages/decyr.txt for translation to YYMMMDD format).
+column 4 - time series last epoch, in decimal year format 
+           (See http://geodesy.unr.edu/NGLStationPages/decyr.txt for translation to YYMMMDD format).
 column 5 - time series duration (years).
 column 6 - number of epochs of data, used or not
 column 7 - number of epochs of good data, i.e. used in at least one velocity sample 
@@ -113,20 +136,20 @@ column 24 - number of steps assumed, determined from our steps database
 
 New to MIDAS_VR
 column 25-27  - east, north, up  velocity uncertainties computed using (A)/VR algorithm by Langbein (2019)
+column 28-30  - east, north, up  fit of functional relation of VR to observed VR (Langbein, 2020)
 
 The fortran format statement for writing these variables is:
 
       write(6,'(a4,1x,a10,2f10.4,f8.4,i5,i5,i7,
      +        3f10.6,1x,3f9.6,
-     +        3f11.6, 3f6.3, 3f9.6, i3,1x,3f9.6)')
+     +        3f11.6, 3f6.3, 3f9.6, i3,1x,3f9.6,3(1x,f13.2))')
      +        sta, label, t(1), t(m), delt, m, mgood, n,
      +        ve50, vn50, vu50, sve, svn, svu,
      +        xe50, xn50, xu50, fe, fn, fu, sde, sdn, sdu, nstep,
-     +        rate_error_e,rate_error_n,rate_error_u
+     +        rate_error_e,rate_error_n,rate_error_u,
+     +        fit_e,fit_n,fit_u
 
-
----------------------------------------------
-
+ 
 Optional OUTPUT files from MIDAS_VR if the -O flag is set:
 
 avr_[enu].dat

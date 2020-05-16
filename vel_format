@@ -20,14 +20,15 @@ colums 21-23 - east, north, up standard deviation velocity pairs
 column 24 - number of steps assumed, determined from our steps database
 
 New to MIDAS_VR
-column 25-27  - east, north, up  velocity uncertainties computed using (A)/VR algorithm by Langbein (2019)
-
+column 25-27  - east, north, up  velocity uncertainties computed using (A)/VR algorithm by Langbein (2020)
+column 28-30  - east, north, up  fit of functional relation of VR to observed VR (Langbein, 2020)
 The fortran format statement for writing these variables is:
 
       write(6,'(a4,1x,a10,2f10.4,f8.4,i5,i5,i7,
      +        3f10.6,1x,3f9.6,
-     +        3f11.6, 3f6.3, 3f9.6, i3,1x,3f9.6)')
+     +        3f11.6, 3f6.3, 3f9.6, i3,1x,3f9.6,3(1x,f13.2))')
      +        sta, label, t(1), t(m), delt, m, mgood, n,
      +        ve50, vn50, vu50, sve, svn, svu,
      +        xe50, xn50, xu50, fe, fn, fu, sde, sdn, sdu, nstep,
-     +        rate_error_e,rate_error_n,rate_error_u
+     +        rate_error_e,rate_error_n,rate_error_u,
+     +        fit_e,fit_n,fit_u
